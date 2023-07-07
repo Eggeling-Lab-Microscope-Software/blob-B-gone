@@ -9,5 +9,5 @@ setup(
     author='Bela Vogler',
     author_email='bela.vogler@uni-jena.de',
     keywords=['feature extraction', 'single particle tracking', 'MINFLUX', 'localization microscopy', 'zombie marker', 'blob', 'artifacts', 'artifact removal'],
-    url='https://github.com/Eggeling-Lab-Microscope-Software/Track2Feature'
+    url='https://github.com/Eggeling-Lab-Microscope-Software/blob-B-gone'
 )
