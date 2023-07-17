@@ -5,6 +5,17 @@ from sklearn import metrics
 from blobBgone.featureHandler import featureHandler
 
 def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:str = 'standardize', verbose:bool = True):    
+    """Standalone implementation of the Blob-B-Gone method for removing blobs from Single Particle Tracking data.
+
+    Args:
+        path (str, optional): Indicate the path to the directory containing the data files as .npy with the format [Z,Y,X,T]. Technically, the sequence of spatial axes is trivial, as we use a point cloud approach. Defaults to None.
+        return_IDs (bool, optional): Flag if you want to merely return the IDs of tracks belonging to either cluster. Defaults to False.
+        regularization_method (str, optional): Flag the method to be used for regularization from ['standardize', 'force_raw']. Defaults to 'standardize'.
+        verbose (bool, optional): Flag the verbosity while clustering. Defaults to True.
+
+    Returns:
+        blobs, free (featureHandler or int): Returns either the feature handler objects of the two clusters or the IDs of the two clusters.
+    """
     # Grab the files
     files = featureHandler.grab_files(path = None)
     if verbose:
@@ -35,7 +46,7 @@ def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:st
         n_init = 'auto',
         max_iter = 300,
         verbose = 0,
-        random_state = None,
+        random_state = None, ## Here, we set the random state to 42 for reproducibility
         )
     fit_predict_FH = clustering_FH.fit_predict(features)
     

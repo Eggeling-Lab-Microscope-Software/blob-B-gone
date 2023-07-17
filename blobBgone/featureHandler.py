@@ -172,13 +172,20 @@ class featureHandler():
     
     ## Visualisation
     def overview(self):
+        plt.style.use("dark_background")
+        
+        font = {'family' : 'DejaVu Sans',
+        'weight' : 'normal',
+        'size'   : 12}
+
+        plt.rc('font', **font)
+        
         if self.__dimension == 2:
             return self.__visualize2D()
         elif self.__dimension == 3:
             return self.__visualize3D()
     
     def __visualize2D(self):
-        plt.style.use("dark_background")
         fig, axs = plt.subplots(1,1, figsize = (5,5), dpi = 100)
         plt.title(f"Point Cloud #{self.__id}", fontsize = 10)
         axs.scatter(*zip(*self.__pointCloud), s = 0.5, c = "deeppink")
@@ -193,7 +200,6 @@ class featureHandler():
         plt.show()
     
     def __visualize3D(self):
-        plt.style.use("dark_background")
         fig, axs = plt.subplots(1,1, figsize = (5,5), dpi = 100, subplot_kw={'projection': '3d'})
         plt.title(f"Point Cloud #{self.__id}", fontsize = 10)
         axs.scatter(*zip(*self.__pointCloud), s = 0.5, c = "deeppink")
@@ -334,7 +340,7 @@ class featureHandler():
         return self.__features.to_dict()
     
     def __repr__(self) -> str:
-        print(f"Feature Handler (ID = {self.ID}, dimension = {self.dimension})")
+        print(f"Feature Handler (ID = {self.ID}, dimension = {self.dimension}, length = {self.pointCloud.shape[0]})")
         try:
             print(f"\nFeatures in place.\n - {self.__features}")
         except:

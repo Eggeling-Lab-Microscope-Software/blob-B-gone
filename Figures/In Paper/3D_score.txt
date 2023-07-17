@@ -1,0 +1,51 @@
+SCORES OF BLOB-B-GONE APPLIED TO 3D TEST DATASET
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ground Truth Clustering - used in Paper
+------------------------------
+
+Cluster 1: 250 tasks
+Cluster 2: 250 tasks
+
+Cluster1
+Low_end_ID: 250
+High_end_ID: 499
+
+Cluster2
+Low_end_ID: 0
+High_end_ID: 249
+
+------------------------------
+
+Track Mismatches:[]
+
+Blob Mismatches:[]
+
+Total number of mismatches: 0
+
+------------------------------
+
+Accuracy: 1.0
+F1 Score: 1.0
+Homogeneity: 1.000
+Completeness: 1.000
+V-measure: 1.000
+Adjusted Rand Index: 1.000
+Adjusted Mutual Information: 1.000
+Silhouette Coefficient: 0.732
+
+------------------------------
+
+Unsupervised Z-Score based application to same dataset - not used in paper
+------------------------------
+Extracting features...
+
+Clustering...
+
+Zombie-score is being calculated...
+Cluster 1 Zombie-score: 70099920.53
+Cluster 2 Zombie-score: 1581784.62
+Zombie-score ratio: 1 : 44.32
+Silhouette Coefficient: 0.743
+
+Cluster 1 has been estimated to be the blob cluster.

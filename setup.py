@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='blob-B-gone',
-    version='0.0.1',
+    version='1.0.0',
     description=' A small framework to separate zombie marker artifacts (blobs) from MINFLUX single particle tracking data.',
     license='BSD 3-Clause License',
     packages=['blobBgone'],

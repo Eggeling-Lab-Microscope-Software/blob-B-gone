@@ -1,0 +1,12 @@
+
+### COVARIANCE USED FOR 2D BLOB SIMULATION ###
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+  	[NORM_DIST_X 	| 	0 		| 	0	]
+COV =	[	0	|	NORM_DIST_Y 	|	0	]
+	[	0	|	0		|	0	]
+
+NORM_DIST_X = Normal_distribution (mean = 3.6698738728187795e-17, standard_deviation = 9.45556668511627e-18)
+NORM_DIST_Y = Normal_distribution (mean = 3.6114617327766393e-17, standard_deviation = 9.108856223230291e-18)
+
+The datasets shown in the figures drew 239041points from these distributions with multivariate mean [0,0].
