@@ -57,13 +57,13 @@ def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:st
     ## Evaluate Blobbness ##
     # this is an experimental metric that attempts to decide what cluster is the blob cluster
     if verbose:
-        print("\nZombie-score is being calculated...")
+        print("\nBlob-score is being calculated...\n")
     c1_blobbness = np.mean([task.features.SPHE/task.features.MAX_DIST for task in cluster_1])
     c2_blobbness = np.mean([task.features.SPHE/task.features.MAX_DIST for task in cluster_2])
     if verbose:
-        print("Cluster 1 Zombie-score: {:.2f}".format(c1_blobbness))
-        print("Cluster 2 Zombie-score: {:.2f}".format(c2_blobbness))
-        print("Zombie-score ratio: 1 : {:.2f}".format(max([c1_blobbness, c2_blobbness])/min([c1_blobbness, c2_blobbness])))
+        print("Cluster 1 Blob-score: {:.2f}".format(c1_blobbness))
+        print("Cluster 2 Blob-score: {:.2f}".format(c2_blobbness))
+        print("Blob-score ratio: 1 : {:.2f}".format(max([c1_blobbness, c2_blobbness])/min([c1_blobbness, c2_blobbness])))
         print(
             "Silhouette Coefficient: %0.3f"
             % metrics.silhouette_score(features, fit_predict_FH, metric="euclidean")
