@@ -118,6 +118,20 @@ class featureHandler():
                    verbose = verbose)
         except:
             raise Exception("pointCloud must be of shape (n,2) or (n,3)")
+        
+    @classmethod
+    def from_pointCloud(cls, pointCloud:np.ndarray, id:int, verbose:bool = True):
+        try:
+            assert isinstance(pointCloud, np.ndarray), "Point Cloud must be a numpy array"
+            assert pointCloud.shape[1] in [2,3], "pointCloud must be two or three dimensional"
+            
+            return cls(pointCloud = pointCloud, 
+                   id = id,
+                   verbose = verbose)
+        except AssertionError as e:
+            print(e)
+        except:
+            raise Exception("pointCloud must be of shape (n,2) or (n,3)")
 
     ## Staticmethods
     @staticmethod
