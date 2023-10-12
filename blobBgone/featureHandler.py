@@ -1,9 +1,11 @@
 import os
 import glob
 import ntpath
-import numpy as np
-import scipy.spatial as spatial
 import warnings
+import numpy as np
+import seaborn as sns
+from pandas import DataFrame
+import scipy.spatial as spatial
 import matplotlib.pyplot as plt
 
 from functools import cached_property
@@ -46,8 +48,8 @@ class featureHandler():
     def ID(self):
         return self.__id
     @ID.setter
-    def ID(self, *args):
-        raise AttributeError("ID is a read-only property")
+    def ID(self, new_id:int):
+        self.__id = new_id
     
     @property
     def dimension(self):
@@ -89,7 +91,7 @@ class featureHandler():
         finally:
             if self.__verbose:
                 print("features have been updated.")
-                
+                                
     ## Classmethods
     # Please note, that we currently only support .npy files as input as tey are commonly found and other methods can be implemented rapidly when needed
     @classmethod
@@ -163,9 +165,12 @@ class featureHandler():
         
         if method == "standardize":
             return __check_nan(__standardize_features(__normalize_features(features)))
+        
+        elif method == "normalize":
+            return __check_nan(__normalize_features(features))
     
         elif method == 'force_raw':
-            print("Warning: Raw features are not recommended for clustering. Please use standardize or normalize instead.")
+            print("Warning: Raw features are not recommended for clustering. Please use 'normalize' or 'standardize' instead.")
             return __check_nan(features)
         else:
             return print("Error: Method not recognized. Please use one of the following: 'standardize' or 'force_raw'")

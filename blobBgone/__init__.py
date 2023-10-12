@@ -4,13 +4,14 @@ from sklearn.cluster import KMeans
 from sklearn import metrics
 from blobBgone.featureHandler import featureHandler
 
-def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:str = 'standardize', verbose:bool = True):    
+def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:str = 'standardize', custom_feature_weights:dict = {'MAX_DIST':1, 'CV_AREA':1, 'SPHE':1, 'ELLI':1, 'CV_DENSITY':1}, verbose:bool = True):    
     """Standalone implementation of the Blob-B-Gone method for removing blobs from Single Particle Tracking data.
 
     Args:
         path (str, optional): Indicate the path to the directory containing the data files as .npy with the format [Z,Y,X,T]. Technically, the sequence of spatial axes is trivial, as we use a point cloud approach. Defaults to None.
         return_IDs (bool, optional): Flag if you want to merely return the IDs of tracks belonging to either cluster. Defaults to False.
-        regularization_method (str, optional): Flag the method to be used for regularization from ['standardize', 'force_raw']. Defaults to 'standardize'.
+        regularization_method (str, optional): Flag the method to be used for regularization from ['standardize', 'normalize', 'force_raw']. Defaults to 'standardize'.
+        custom_feature_weights (dict, optional): Set custom feature weights to be used for clustering. Defaults to {'MAX_DIST':1, 'CV_AREA':1, 'SPHE':1, 'ELLI':1, 'CV_DENSITY':1}.
         verbose (bool, optional): Flag the verbosity while clustering. Defaults to True.
 
     Returns:
@@ -36,6 +37,8 @@ def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:st
     features = featureHandler.regularize_output(features, method = regularization_method)
     assert np.all(np.isfinite(features)), "NaN values still present in features."
 
+    # Grab weights
+    weights = np.array([custom_feature_weights[feature] for feature in task_list[0].features.__dict__.keys()])
 
     if verbose:
         print("\nClustering...")
@@ -48,7 +51,7 @@ def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:st
         verbose = 0,
         random_state = None, ## Here, we set the random state to 42 for reproducibility
         )
-    fit_predict_FH = clustering_FH.fit_predict(features)
+    fit_predict_FH = clustering_FH.fit_predict(features*weights)
     
     cluster_1 = [task_list[i] for i in range(len(task_list)) if fit_predict_FH[i] == 0]
     cluster_2 = [task_list[i] for i in range(len(task_list)) if fit_predict_FH[i] == 1]
