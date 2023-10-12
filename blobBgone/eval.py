@@ -3,7 +3,6 @@ import numpy as np
 import seaborn as sns
 from pandas import DataFrame
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
 
 ## Collection of small quick evaluation methods
 class eval(object):

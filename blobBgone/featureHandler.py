@@ -1,13 +1,12 @@
+## Imports
 import os
 import glob
 import ntpath
 import warnings
 import numpy as np
-import seaborn as sns
-from pandas import DataFrame
+
 import scipy.spatial as spatial
 import matplotlib.pyplot as plt
-
 from functools import cached_property
 
 from blobBgone.features import features

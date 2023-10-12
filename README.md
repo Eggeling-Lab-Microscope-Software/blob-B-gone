@@ -7,6 +7,7 @@ Dependencies:
 - Numpy
 - Scipy
 - Matplotlib
+- Pandas (Only for Evaluation)
 - TkInter (If on Windows)
 
 More precise dependencies will come once I set up the PyPi.
