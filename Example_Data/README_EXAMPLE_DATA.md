@@ -13,5 +13,8 @@ We include 4 figures so you can get an overview of the data without the need to 
 ### MINFLUX Data Directory
 Please, find the data used in the work for analyzing MINLFUX blob forming in the `Blob_GQ23nm_2D_Tracks` (2D) and `Blob_GQ23nm_3D_Tracks` (3D) directories and both used MINFLIX tracking sequences in `MINFLUX Tracking Sequences`.
 
+### ADDITIONAL_MFX_DATA Directory
+Please, find the MINFLUX Single Particle Tracking data taken on Giant Unilamellar Vesicles (GUVs), which has been used in the work to assess *in vitro* performance, under the `ADDITIONAL_MFX_DATA` directory. You can access the raw point cloud (x,y) data under `Labelled_Data` and the corresponding thumbnails of each trace under `Labelled_Thumbnails`.
+
 In `Blob_GQ23nm_2D_Tracks` (2D) and `Blob_GQ23nm_3D_Tracks` (3D), we include `*_COVARIANCE_MATRICES.txt` files containint the values used for 2D/3D blob simulations.
 Each `.npy` includes one blob as a numpy array of shape `[N,4] - Z,Y,X,T`.
