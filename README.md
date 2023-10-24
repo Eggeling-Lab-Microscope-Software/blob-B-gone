@@ -7,8 +7,10 @@ Dependencies:
 - Numpy
 - Scipy
 - Matplotlib
+- Scikit-learn
+- seaborn
 - Pandas (Only for Evaluation)
 - TkInter (If on Windows)
 
-More precise dependencies will come once I set up the PyPi.
+More precise dependencies will come once the original article is published.
 Technically, this should run on both Windows and Linux. 
