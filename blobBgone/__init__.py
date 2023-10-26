@@ -1,10 +1,11 @@
 import os
 import numpy as np
-from sklearn.cluster import KMeans
 from sklearn import metrics
+from sklearn.cluster import KMeans
 from blobBgone.featureHandler import featureHandler
+from blobBgone.eval import eval
 
-def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:str = 'standardize', custom_feature_weights:dict = {'MAX_DIST':1, 'CV_AREA':1, 'SPHE':1, 'ELLI':1, 'CV_DENSITY':1}, verbose:bool = True):    
+def BlobBGone_legacy(path:str = None, key:str = "*", return_IDs:bool = False, regularization_method:str = 'standardize', custom_feature_weights:dict = {'MAX_DIST':1, 'CV_AREA':1, 'SPHE':1, 'ELLI':1, 'CV_DENSITY':1}, verbose:bool = True):    
     """Standalone implementation of the Blob-B-Gone method for removing blobs from Single Particle Tracking data.
 
     Args:
@@ -18,7 +19,7 @@ def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:st
         blobs, free (featureHandler or int): Returns either the feature handler objects of the two clusters or the IDs of the two clusters.
     """
     # Grab the files
-    files = featureHandler.grab_files(path = None)
+    files = featureHandler.grab_files(path = path, key = key, dtype=".npy")
     if verbose:
         print(f"Found {len(files)} files in the '{files[0].split(os.sep)[-2]}' directory.")
         
@@ -49,7 +50,7 @@ def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:st
         n_init = 'auto',
         max_iter = 300,
         verbose = 0,
-        random_state = None, ## Here, we set the random state to 42 for reproducibility
+        random_state = None,
         )
     fit_predict_FH = clustering_FH.fit_predict(features*weights)
     
@@ -82,3 +83,206 @@ def BlobBGone(path:str = None, return_IDs:bool = False, regularization_method:st
     blobs = [task.ID for task in comb[np.argmax([c1_blobbness, c2_blobbness])]]
     free =  [task.ID for task in comb[np.argmin([c1_blobbness, c2_blobbness])]]
     return blobs, free
+
+## Class definition of BlobBGone ##
+
+class blobBgone(object):
+    __verbose:bool
+    __custom_weights:dict
+    
+    __task_list:list
+    __blob_IDs:list
+    __free_IDs:list
+    __blobs:list
+    __free:list
+             
+    def __init__(self, task_list:list, 
+                 verbose:bool = True) -> None:
+        self.__verbose = verbose
+        self.__custom_weights = {'MAX_DIST':1, 'CV_AREA':1, 'SPHE':1, 'ELLI':1, 'CV_DENSITY':1}
+        self.__task_list = task_list
+        self.__blob_IDs = None
+        self.__free_IDs = None
+        self.__blobs = None
+        self.__free = None
+    
+    ## Properties ##
+    @property
+    def verbose(self):
+        return self.__verbose
+    @verbose.setter
+    def verbose(self, verbose:bool):
+        self.__verbose = verbose
+        return print("Verbosity has been set to {}.".format(verbose))
+    
+    @property
+    def task_list(self):
+        return self.__task_list
+    @task_list.setter
+    def task_list(self, task_list:list):
+        self.__task_list = task_list
+        return print("Task list has been updated.")
+    
+    @property
+    def blobs(self):
+        try:
+            assert self.__blobs is not None, "Blob cluster not yet extracted."
+        except AssertionError as error:
+            print(error)
+            return print("Please call the 'run' method first.")
+        return self.__blobs
+    @blobs.setter
+    def blobs(self, *args, **kwargs):
+        return print("blobs attribute is read-only.")
+    
+    @property
+    def free(self):
+        try:
+            assert self.__free is not None, "Free cluster not yet extracted."
+        except AssertionError as error:
+            print(error)
+            return print("Please call the 'run' method first.")
+        return self.__free
+    @free.setter
+    def free(self, *args, **kwargs):
+        return print("free attribute is read-only.")
+    
+    @property
+    def blob_IDs(self):
+        try:
+            assert self.__blob_IDs is not None, "Blob cluster not yet extracted."
+        except AssertionError as error:
+            print(error)
+            return print("Please call the 'run' method first.")
+        return self.__blob_IDs
+    @blob_IDs.setter
+    def blob_IDs(self, *args, **kwargs):
+        return print("blob_IDs attribute is read-only.")
+    
+    @property
+    def free_IDs(self):
+        try:
+            assert self.__free_IDs is not None, "Free cluster not yet extracted."
+        except AssertionError as error:
+            print(error)
+            return print("Please call the 'run' method first.")
+        return self.__free_IDs
+    @free_IDs.setter
+    def free_IDs(self, *args, **kwargs):
+        return print("free_IDs attribute is read-only.")
+        
+    ## Class Methods ##
+    @classmethod
+    def from_npy(cls, path:str = None, key:str = "*",
+                 verbose:bool = True) -> None:
+        
+        files = featureHandler.grab_files(path = path, key = key, dtype=".npy")
+        if verbose:
+            print(f"Found {len(files)} files in the '{files[0].split(os.sep)[-2]}' directory.")
+            
+        task_list = [featureHandler.from_npy(path = file, verbose = False) for file in files]
+        if verbose:
+            print(f"{len(task_list)} tasks have been created.")
+        
+        return cls(task_list = task_list, verbose = verbose)
+    
+    @classmethod
+    def from_pointCloud(cls, pointCloud:np.ndarray, 
+                        verbose:bool = True) -> None:
+        
+        task_list = [featureHandler.from_pointCloud(pointCloud = pointCloud, verbose = False)]
+        if verbose:
+            print(f"{len(task_list)} tasks have been created.")
+        
+        return cls(task_list = task_list, verbose = verbose)
+    
+    ## Main Function ##
+    def run(self, regularization_method:str = 'standardize'):
+
+        # Extracting Features
+        features = self.__extract_features()
+        
+        # Regularize the features
+        features = featureHandler.regularize_output(features, method = regularization_method)
+        assert np.all(np.isfinite(features)), "NaN values still present in features."
+ 
+        # Grab weights
+        features = self.__apply_custom_weights(features)
+
+        # Cluster the features
+        if self.__verbose:
+            print("\nClustering...")
+            
+        clustering_FH  = KMeans(
+            n_clusters = 2,
+            init = 'k-means++',
+            n_init = 'auto',
+            max_iter = 300,
+            verbose = 0,
+            random_state = None,
+            )
+        fit_predict_FH = clustering_FH.fit_predict(features)
+        
+        cluster_1 = [self.task_list[i] for i in range(len(self.task_list)) if fit_predict_FH[i] == 0]
+        cluster_2 = [self.task_list[i] for i in range(len(self.task_list)) if fit_predict_FH[i] == 1]
+        comb = [cluster_1, cluster_2]
+        
+        ## Evaluate Blobbness ##
+        if self.__verbose:
+            print("\nBlob-score is being calculated...\n")
+        c1_blobbness = np.mean([task.features.SPHE/task.features.MAX_DIST for task in cluster_1])
+        c2_blobbness = np.mean([task.features.SPHE/task.features.MAX_DIST for task in cluster_2])
+        
+        if self.__verbose:
+            print("Cluster 1 Blob-score: {:.2f}".format(c1_blobbness))
+            print("Cluster 2 Blob-score: {:.2f}".format(c2_blobbness))
+            print("Blob-score ratio: 1 : {:.2f}".format(max([c1_blobbness, c2_blobbness])/min([c1_blobbness, c2_blobbness])))
+            print(
+                "Silhouette Coefficient: %0.3f"
+                % metrics.silhouette_score(features, fit_predict_FH, metric="euclidean")
+            )
+            
+            print("\nCluster {} has been estimated to be the blob cluster.".format(np.argmax([c1_blobbness, c2_blobbness])+1))
+
+        self.__blobs = [task for task in comb[np.argmax([c1_blobbness, c2_blobbness])]]
+        self.__free =  [task for task in comb[np.argmin([c1_blobbness, c2_blobbness])]]
+        self.__blob_IDs = [task.ID for task in comb[np.argmax([c1_blobbness, c2_blobbness])]]
+        self.__free_IDs =  [task.ID for task in comb[np.argmin([c1_blobbness, c2_blobbness])]]
+        return print("Blob-B-Gone has finished running.\nGet the results with the 'blobs' and 'free' attributes or via the 'blob_IDs' and 'free_IDs' attributes.")
+    
+    ## Evaluation ##
+    def plot_PCA(self):
+        return eval.plot_PCA(features = self.__apply_custom_weights(self.__extract_features), 
+                             blob_Ids = self.__blob_IDs, 
+                             feature_keywords = list(self.__task_list[0].features.__dict__.keys()), 
+                             include_eigenvectors=False)
+    
+    ## Advanced User Only ##
+    @property
+    def custom_weights(self):
+        return self.__custom_weights
+    @custom_weights.setter
+    def custom_weights(self, custom_weights:dict):
+        try:
+            assert isinstance(custom_weights, dict), "custom_weights must be a dictionary."
+            assert set(custom_weights.keys()) == set(self.task_list[0].features.__dict__.keys()), "custom_weights must have the same keys as the features."
+        except AssertionError as error:
+            print(error)
+            return print("Default weights will be used.")
+        self.__custom_weights = custom_weights
+    
+    ## Helper Functions ##
+    def __extract_features(self):
+        if self.__verbose:
+            print("\nExtracting features...")
+        # Extract features
+        features = []
+        for task in self.task_list:
+            task.extract()
+            features.append(task.to_array())
+        return features
+    
+    def __apply_custom_weights(self, features:np.ndarray):
+        weights = np.array([self.__custom_weights[feature] for feature in self.task_list[0].features.__dict__.keys()])
+        return features*weights
+    
