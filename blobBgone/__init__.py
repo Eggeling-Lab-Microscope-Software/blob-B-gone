@@ -88,6 +88,7 @@ def BlobBGone_legacy(path:str = None, key:str = "*", return_IDs:bool = False, re
 
 class blobBgone(object):
     __verbose:bool
+    __regularization:str
     __custom_weights:dict
     
     __task_list:list
@@ -101,6 +102,7 @@ class blobBgone(object):
         self.__verbose = verbose
         self.__custom_weights = {'MAX_DIST':1, 'CV_AREA':1, 'SPHE':1, 'ELLI':1, 'CV_DENSITY':1}
         self.__task_list = task_list
+        self.__regularization = "standardize"
         self.__blob_IDs = None
         self.__free_IDs = None
         self.__blobs = None
@@ -114,6 +116,20 @@ class blobBgone(object):
     def verbose(self, verbose:bool):
         self.__verbose = verbose
         return print("Verbosity has been set to {}.".format(verbose))
+    
+    @property
+    def regularization(self):
+        return self.__regularization
+    @regularization.setter
+    def regularization(self, regularization:str):
+        try:
+            assert regularization in ['standardize', 'normalize', 'force_raw']
+        except AssertionError as error:
+            print(error)
+            print("The regularization method must be in ['standardize', 'normalize', 'force_raw'].")
+            
+        self.__regularization = regularization
+        return print("Regularization method has been set to {}".format(regularization))
     
     @property
     def task_list(self):
@@ -203,8 +219,7 @@ class blobBgone(object):
         features = self.__extract_features()
         
         # Regularize the features
-        features = featureHandler.regularize_output(features, method = regularization_method)
-        assert np.all(np.isfinite(features)), "NaN values still present in features."
+        features = self.__regularize_features(features=features)
  
         # Grab weights
         features = self.__apply_custom_weights(features)
@@ -248,11 +263,11 @@ class blobBgone(object):
         self.__free =  [task for task in comb[np.argmin([c1_blobbness, c2_blobbness])]]
         self.__blob_IDs = [task.ID for task in comb[np.argmax([c1_blobbness, c2_blobbness])]]
         self.__free_IDs =  [task.ID for task in comb[np.argmin([c1_blobbness, c2_blobbness])]]
-        return print("Blob-B-Gone has finished running.\nGet the results with the 'blobs' and 'free' attributes or via the 'blob_IDs' and 'free_IDs' attributes.")
+        return print("Blob-B-Gone has finished running.\n\nGet the results with the 'blobs' and 'free' attributes\nor via the 'blob_IDs' and 'free_IDs' attributes.")
     
     ## Evaluation ##
     def plot_PCA(self):
-        return eval.plot_PCA(features = self.__apply_custom_weights(self.__extract_features), 
+        return eval.plot_PCA(features = self.__apply_custom_weights(self.__regularize_features(self.__extract_features())), 
                              blob_Ids = self.__blob_IDs, 
                              feature_keywords = list(self.__task_list[0].features.__dict__.keys()), 
                              include_eigenvectors=False)
@@ -283,6 +298,11 @@ class blobBgone(object):
         return features
     
     def __apply_custom_weights(self, features:np.ndarray):
-        weights = np.array([self.__custom_weights[feature] for feature in self.task_list[0].features.__dict__.keys()])
+        weights = np.array([self.__custom_weights[feature] for feature in list(self.__task_list[0].features.__dict__.keys())])
         return features*weights
+    
+    def __regularize_features(self, features:np.ndarray):
+        features = featureHandler.regularize_output(features, method = self.__regularization)
+        assert np.all(np.isfinite(features)), "NaN values still present in features."
+        return features
     
