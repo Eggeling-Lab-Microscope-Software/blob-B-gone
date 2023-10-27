@@ -96,7 +96,8 @@ class blobBgone(object):
     __free_IDs:list
     __blobs:list
     __free:list
-             
+    
+    ## Initialization ##
     def __init__(self, task_list:list, 
                  verbose:bool = True) -> None:
         self.__verbose = verbose
@@ -107,6 +108,12 @@ class blobBgone(object):
         self.__free_IDs = None
         self.__blobs = None
         self.__free = None
+        
+        self.__post_init__()
+    
+    ## Execute after initialization ##
+    def __post_init__(self):
+        self.__sort_by_ID()
     
     ## Properties ##
     @property
@@ -213,7 +220,7 @@ class blobBgone(object):
         return cls(task_list = task_list, verbose = verbose)
     
     ## Main Function ##
-    def run(self, regularization_method:str = 'standardize'):
+    def run(self):
 
         # Extracting Features
         features = self.__extract_features()
@@ -266,11 +273,13 @@ class blobBgone(object):
         return print("Blob-B-Gone has finished running.\n\nGet the results with the 'blobs' and 'free' attributes\nor via the 'blob_IDs' and 'free_IDs' attributes.")
     
     ## Evaluation ##
-    def plot_PCA(self):
-        return eval.plot_PCA(features = self.__apply_custom_weights(self.__regularize_features(self.__extract_features())), 
-                             blob_Ids = self.__blob_IDs, 
+    def plot_PCA(self, include_eigenvectors:bool = True, absolute:bool = False):
+        combined_features, labels = self.__construct_labels()
+        return eval.plot_PCA(features = self.__apply_custom_weights(self.__regularize_features(combined_features)), 
+                             labels = labels, 
                              feature_keywords = list(self.__task_list[0].features.__dict__.keys()), 
-                             include_eigenvectors=False)
+                             include_eigenvectors=include_eigenvectors,
+                             absolute = absolute)
     
     ## Advanced User Only ##
     @property
@@ -287,6 +296,12 @@ class blobBgone(object):
         self.__custom_weights = custom_weights
     
     ## Helper Functions ##
+    def __sort_by_ID(self):
+        self.__task_list = sorted(self.__task_list, key=lambda x: x.ID)
+        if self.__verbose:
+            print("Task list has been sorted by ID.")
+        return
+    
     def __extract_features(self):
         if self.__verbose:
             print("\nExtracting features...")
@@ -297,12 +312,40 @@ class blobBgone(object):
             features.append(task.to_array())
         return features
     
-    def __apply_custom_weights(self, features:np.ndarray):
-        weights = np.array([self.__custom_weights[feature] for feature in list(self.__task_list[0].features.__dict__.keys())])
-        return features*weights
-    
     def __regularize_features(self, features:np.ndarray):
+        if self.__verbose:
+            print("\nRegularizing features...")
         features = featureHandler.regularize_output(features, method = self.__regularization)
         assert np.all(np.isfinite(features)), "NaN values still present in features."
         return features
+    
+    def __apply_custom_weights(self, features:np.ndarray):
+        weights = np.array([self.__custom_weights[feature] for feature in list(self.__task_list[0].features.__dict__.keys())])
+        if weights.all() == 1:
+            if self.__verbose:
+                print("No custom weights have been applied.")
+            return features
+        if self.__verbose:
+            print("Custom weights have been applied.")
+        return features*weights
+    
+    def __construct_labels(self):
+        try:
+            assert self.__blobs is not None, "Blob cluster not yet extracted."
+            assert self.__free is not None, "Free cluster not yet extracted."
+        except AssertionError as error:
+            print(error)
+            return print("Please call the 'run' method first.")
+
+        if self.__verbose:
+            print("\n Collecting features...")
+        combined_features = np.concatenate(([task.to_array() for task in self.__blobs], 
+                                            [task.to_array() for task in self.__free]))
+        if self.__verbose:
+            print("\n Constructing labels...")
+        labels = np.concatenate((np.zeros(len(self.__blobs)), np.ones(len(self.__free))))
+        return combined_features, labels
+    
+
+        
     

@@ -144,13 +144,14 @@ class eval(object):
         return fig, axs
         
     @staticmethod
-    def plot_PCA(features:np.ndarray, blob_Ids:list, feature_keywords:list, include_eigenvectors:bool = False):
+    def plot_PCA(features:np.ndarray, labels:np.ndarray, feature_keywords:list, include_eigenvectors:bool = False, absolute:bool = False):
         """Plot the PCA of the features and optionally, the respective Eigenvectors.
 
         Args:
             features (np.ndarray): Row-stacked features. Shape: (n_samples, n_features)
             feature_keywords (list): Sequence of included features. The length has to match the number of features.
             include_eigenvectors (bool, optional): Whether to include the Eigenvectors. Defaults to False.
+            absolute (bool, optional): Whether to plot the absolute values of the Eigenvectors. Defaults to False.
 
         Returns:
             plt.figure, plt.ax: The figure and axis objects of the PCA plot.
@@ -165,51 +166,56 @@ class eval(object):
                 'size'   : 10}
         plt.rc('font', **font)
         
-        def _calculate_PCA_eigenvectors(feature_set_list:list, n_components:int = 2, absolute:bool = True):
+        def _calculate_PCA_eigenvectors(pca:PCA, absolute:bool = True):
             ## A Function to calculate the eigenvectors of the PCA for a list of features and return both eigenvectors and explained variance ratios
             
-            PCA_list = [PCA(n_components=n_components) for _ in range(len(feature_set_list))]
-            [pca.fit_transform(feature_set) for pca, feature_set in zip(PCA_list, feature_set_list)]
+            pca.fit_transform(features)
 
             if absolute:
-                return [abs(pca.components_) for pca in PCA_list], [pca.explained_variance_ratio_.round(2) for pca in PCA_list]
+                return abs(pca.components_), pca.explained_variance_ratio_.round(2)
             else:
-                return [pca.components_ for pca in PCA_list], [pca.explained_variance_ratio_.round(2) for pca in PCA_list]
+                return pca.components_, pca.explained_variance_ratio_.round(2)
             
-        def _plot_PCA_eigenvectors(feature_set_list, title_list:list, feature_keywords:list, n_components:int = 2, absolute:bool = True, ax = None):
-            PCA_components, PCA_ratios = _calculate_PCA_eigenvectors(feature_set_list, n_components = n_components, absolute = absolute)
-            PCA_components_dict = {key:(pca_eigenvector, pca_ratio)for key, pca_eigenvector, pca_ratio in zip(title_list, PCA_components, PCA_ratios)}
+        def _plot_PCA_eigenvectors(pca:PCA, feature_keywords:list, absolute:bool = True, ax = None):
+            PCA_components, PCA_ratios = _calculate_PCA_eigenvectors(pca=pca, absolute = absolute)
+            PCA_components_dict = {'PCA_comp':(PCA_components, PCA_ratios)}
 
-
-            for key in PCA_components_dict.keys():
-                temp_df = DataFrame.from_dict(PCA_components_dict[key][0])
-                temp_df.columns = feature_keywords
-                temp_df.index = [f"PC{i+1} - EVR: {PCA_components_dict[key][1][i]:.2f}" for i in range(n_components)]
-                temp_df = temp_df.T
-                
-                temp_df.T.plot(kind = 'bar', ylim = (-1,1), ax=ax)
-                
-                if absolute:
-                    ax.set_ylim(0,1)   
-                        
+            temp_df = DataFrame.from_dict(PCA_components_dict['PCA_comp'][0])
+            temp_df.columns = feature_keywords
+            temp_df.index = [f"PC{i+1} - EVR: {PCA_components_dict['PCA_comp'][1][i]:.2f}" for i in range(2)]
+            temp_df = temp_df.T
+            
+            temp_df.T.plot(kind = 'bar', ylim = (-1,1), ax=ax)
+            
+            if absolute:
+                ax.set_ylim(0,1)   
+                plt.legend(loc = 'upper left', fontsize = 10, ncols = 2)  
+            else:
+                plt.legend(loc = 'lower right', fontsize = 10, ncols = 2)  
                 plt.hlines(0,-1,5, color = 'k', linestyle = '--')
-                plt.setp(ax.get_xticklabels(), rotation=0)
-                plt.legend(loc = 'lower right', fontsize = 12, ncols = 2)        
+
+            plt.setp(ax.get_xticklabels(), rotation=0) 
 
         pca = PCA(n_components=2)
         trans= pca.fit_transform(features)
         
-        #setup labels
-        labels_pred = np.ones(len(features))
-        labels_pred[blob_Ids] = 0
-
-        cluster_1_mean = np.array([np.mean(trans[labels_pred == 0], axis = 0)[0], np.mean(trans[labels_pred == 0], axis = 0)[1]])
-        cluster_2_mean = np.array([np.mean(trans[labels_pred == 1], axis = 0)[0], np.mean(trans[labels_pred == 1], axis = 0)[1]])
+        cluster_1_mean = np.array([np.mean(trans[labels == 0], axis = 0)[0], np.mean(trans[labels == 0], axis = 0)[1]])
+        cluster_2_mean = np.array([np.mean(trans[labels == 1], axis = 0)[0], np.mean(trans[labels == 1], axis = 0)[1]])
         P1,P2 = Helper.generate_perpendicular_vector(cluster_1_mean, cluster_2_mean, scale = 1.5, direction = 'center')
-
-        fig, axs = plt.subplots(1,2, figsize=(12,5), dpi = 150)
-        axs[0].scatter(trans[:,0][labels_pred == 0], trans[:,1][labels_pred == 0], c = 'blue', s = 14)
-        axs[0].scatter(trans[:,0][labels_pred == 1], trans[:,1][labels_pred == 1], c = 'red', s = 14)
+        if include_eigenvectors:
+            fig, axs = plt.subplots(1,2, figsize=(12,5), dpi = 150)
+            axs[1].set_title('Eigenvectors for\nPCA 1&2', fontsize = 14, fontweight = 'bold') 
+            if absolute:
+                axs[1].set_title('Absolute Eigenvectors for\nPCA 1&2', fontsize = 14, fontweight = 'bold')
+            _plot_PCA_eigenvectors( pca=pca,
+                                    feature_keywords=feature_keywords, 
+                                    absolute=absolute, 
+                                    ax = axs[1]) 
+        else:
+            fig, axs = plt.subplots(1,1, figsize=(6,5), dpi = 150)
+            axs = [axs]
+        axs[0].scatter(trans[:,0][labels == 0], trans[:,1][labels == 0], c = 'blue', s = 14)
+        axs[0].scatter(trans[:,0][labels == 1], trans[:,1][labels == 1], c = 'red', s = 14)
         axs[0].scatter(cluster_1_mean[0], cluster_1_mean[1], c = 'black', s = 350, marker = '2', label = 'Center of Mass')
         axs[0].scatter(cluster_2_mean[0], cluster_2_mean[1], c = 'black', s = 350, marker = '2')
         axs[0].plot([cluster_1_mean[0], cluster_2_mean[0]], [cluster_1_mean[1], cluster_2_mean[1]], '--', c = 'black', linewidth = 1.25)
@@ -227,12 +233,7 @@ class eval(object):
         CoM =  axs[0].scatter(cluster_1_mean[0], cluster_1_mean[1], c = 'black', s = 250, marker = '2', label = 'Center of Mass')
 
         axs[0].legend(handles=[red_patch, blue_patch, Division, CoM], fontsize = 9, loc = 'upper left', ncol= 2)
-        
-        _plot_PCA_eigenvectors(feature_set_list=[features],
-                                      feature_keywords=feature_keywords,
-                                      title_list=['PCA Eigenvectors'],
-                                      n_components=2, absolute=False, ax = axs[1]) 
-        axs[1].set_title('Eigenvectors for\nPCA 1&2', fontsize = 14, fontweight = 'bold')       
+              
         return fig, axs
 
         
