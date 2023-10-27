@@ -92,7 +92,7 @@ class featureHandler():
                 print("features have been updated.")
                                 
     ## Classmethods
-    # Please note, that we currently only support .npy files as input as tey are commonly found and other methods can be implemented rapidly when needed
+    # Please note, that we currently only support .npy files as input as tey are commonly found and other methods can be implemented rapidly when needed.
     @classmethod
     def from_npy(cls, path:str = None, verbose:bool = True):
         def __path_leaf(path):
@@ -134,7 +134,7 @@ class featureHandler():
 
     ## Staticmethods
     @staticmethod
-    def grab_files(path:str = None):
+    def grab_files(path:str = None, key:str = "*", dtype:str = ".npy"):
         if path == None:
             try:
                 path = pD.askDIR()
@@ -144,7 +144,7 @@ class featureHandler():
         assert os.path.exists(path), "Path does not exist"
         assert os.path.isdir(path), "Path must be a directory"
         
-        return glob.glob(os.path.join(path, "*.npy"))
+        return np.array(glob.glob(os.path.join(path, f"{key}{dtype}")))
     
     @staticmethod
     def regularize_output(features:list, method:str)->np.ndarray:
