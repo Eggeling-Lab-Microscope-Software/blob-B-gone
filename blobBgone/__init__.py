@@ -3,6 +3,8 @@ import numpy as np
 from sklearn import metrics
 from sklearn.cluster import KMeans
 from blobBgone.featureHandler import featureHandler
+from blobBgone.features2D import features2D
+from blobBgone.features3D import features3D
 from blobBgone.eval import eval
 
 def BlobBGone_legacy(path:str = None, key:str = "*", return_IDs:bool = False, regularization_method:str = 'standardize', custom_feature_weights:dict = {'MAX_DIST':1, 'CV_AREA':1, 'SPHE':1, 'ELLI':1, 'CV_DENSITY':1}, verbose:bool = True):    
@@ -101,9 +103,10 @@ class blobBgone(object):
     def __init__(self, task_list:list, 
                  verbose:bool = True) -> None:
         self.__verbose = verbose
-        self.__custom_weights = {'MAX_DIST':1, 'CV_AREA':1, 'SPHE':1, 'ELLI':1, 'CV_DENSITY':1}
         self.__task_list = task_list
         self.__regularization = "standardize"
+        
+        self.__custom_weights = None
         self.__blob_IDs = None
         self.__free_IDs = None
         self.__blobs = None
@@ -114,7 +117,8 @@ class blobBgone(object):
     ## Execute after initialization ##
     def __post_init__(self):
         self.__sort_by_ID()
-    
+        self.__spinup_weights(dimension = self.__task_list[0].dimension)
+        
     ## Properties ##
     @property
     def verbose(self):
@@ -210,10 +214,10 @@ class blobBgone(object):
         return cls(task_list = task_list, verbose = verbose)
     
     @classmethod
-    def from_pointCloud(cls, pointCloud:np.ndarray, 
+    def from_pointCloud(cls, pointClouds:dict, 
                         verbose:bool = True) -> None:
         
-        task_list = [featureHandler.from_pointCloud(pointCloud = pointCloud, verbose = False)]
+        task_list = [featureHandler.from_pointCloud(pointCloud = value, id = key,  verbose = False) for key,value in pointClouds.items()]
         if verbose:
             print(f"{len(task_list)} tasks have been created.")
         
@@ -270,7 +274,9 @@ class blobBgone(object):
         self.__free =  [task for task in comb[np.argmin([c1_blobbness, c2_blobbness])]]
         self.__blob_IDs = [task.ID for task in comb[np.argmax([c1_blobbness, c2_blobbness])]]
         self.__free_IDs =  [task.ID for task in comb[np.argmin([c1_blobbness, c2_blobbness])]]
-        return print("Blob-B-Gone has finished running.\n\nGet the results with the 'blobs' and 'free' attributes\nor via the 'blob_IDs' and 'free_IDs' attributes.")
+        if self.__verbose:
+            print("\nBlob-B-Gone has finished running.\n\nGet the results with the 'blobs' and 'free' attributes\nor via the 'blob_IDs' and 'free_IDs' attributes.")
+        return
     
     ## Evaluation ##
     def plot_PCA(self, include_eigenvectors:bool = True, absolute:bool = False):
@@ -289,7 +295,7 @@ class blobBgone(object):
     def custom_weights(self, custom_weights:dict):
         try:
             assert isinstance(custom_weights, dict), "custom_weights must be a dictionary."
-            assert set(custom_weights.keys()) == set(self.task_list[0].features.__dict__.keys()), "custom_weights must have the same keys as the features."
+            assert set(custom_weights.keys()) == set(self.__custom_weights.keys()), "custom_weights must have the same keys as the features."
         except AssertionError as error:
             print(error)
             return print("Default weights will be used.")
@@ -302,6 +308,14 @@ class blobBgone(object):
             print("Task list has been sorted by ID.")
         return
     
+    def __spinup_weights(self, dimension:int):
+        if dimension == 2:
+            self.__custom_weights = {key:1 for key in features2D.__annotations__.keys()}
+            return
+        if dimension == 3:
+            self.__custom_weights = {key:1 for key in features3D.__annotations__.keys()}
+            return 
+        
     def __extract_features(self):
         if self.__verbose:
             print("\nExtracting features...")
@@ -323,10 +337,10 @@ class blobBgone(object):
         weights = np.array([self.__custom_weights[feature] for feature in list(self.__task_list[0].features.__dict__.keys())])
         if weights.all() == 1:
             if self.__verbose:
-                print("No custom weights have been applied.")
+                print("\nNo custom weights have been applied.")
             return features
         if self.__verbose:
-            print("Custom weights have been applied.")
+            print("\nCustom weights have been applied.")
         return features*weights
     
     def __construct_labels(self):
@@ -338,11 +352,11 @@ class blobBgone(object):
             return print("Please call the 'run' method first.")
 
         if self.__verbose:
-            print("\n Collecting features...")
+            print("\nCollecting features...")
         combined_features = np.concatenate(([task.to_array() for task in self.__blobs], 
                                             [task.to_array() for task in self.__free]))
         if self.__verbose:
-            print("\n Constructing labels...")
+            print("\nConstructing labels...")
         labels = np.concatenate((np.zeros(len(self.__blobs)), np.ones(len(self.__free))))
         return combined_features, labels
     

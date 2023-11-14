@@ -203,7 +203,7 @@ class eval(object):
         cluster_2_mean = np.array([np.mean(trans[labels == 1], axis = 0)[0], np.mean(trans[labels == 1], axis = 0)[1]])
         P1,P2 = Helper.generate_perpendicular_vector(cluster_1_mean, cluster_2_mean, scale = 1.5, direction = 'center')
         if include_eigenvectors:
-            fig, axs = plt.subplots(1,2, figsize=(12,5), dpi = 150)
+            fig, axs = plt.subplots(1,2, figsize=(12,5), dpi = 100)
             axs[1].set_title('Eigenvectors for\nPCA 1&2', fontsize = 14, fontweight = 'bold') 
             if absolute:
                 axs[1].set_title('Absolute Eigenvectors for\nPCA 1&2', fontsize = 14, fontweight = 'bold')
