@@ -335,7 +335,8 @@ class blobBgone(object):
     
     def __apply_custom_weights(self, features:np.ndarray):
         weights = np.array([self.__custom_weights[feature] for feature in list(self.__task_list[0].features.__dict__.keys())])
-        if weights.all() == 1:
+        print(weights)
+        if np.all(weights == 1):
             if self.__verbose:
                 print("\nNo custom weights have been applied.")
             return features
