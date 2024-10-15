@@ -235,7 +235,3 @@ class eval(object):
         axs[0].legend(handles=[red_patch, blue_patch, Division, CoM], fontsize = 9, loc = 'upper left', ncol= 2)
               
         return fig, axs
-
-        
-
-                

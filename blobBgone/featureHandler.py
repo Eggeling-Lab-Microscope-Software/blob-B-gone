@@ -365,6 +365,3 @@ class featureHandler():
             print("\nFeatures not yet set up. Please, call featureHandler.extract() to generate features.")
         finally:
             return " \n      -------------------------------------- \n\n - To get an array of features call featureHandler.to_array()\n - To get a dict of features call featureHandler.to_dict()"
-
-
-    
