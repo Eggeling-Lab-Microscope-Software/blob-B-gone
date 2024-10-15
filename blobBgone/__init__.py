@@ -7,6 +7,18 @@ from blobBgone.features2D import features2D
 from blobBgone.features3D import features3D
 from blobBgone.eval import eval
 
+# dynamic tqdm
+from IPython import get_ipython
+try:
+    ipy_str = str(type(get_ipython()))
+    if 'zmqshell' in ipy_str:
+        from tqdm.notebook import tqdm
+    else:
+        from tqdm import tqdm
+except:
+    from tqdm import tqdm
+
+
 def BlobBGone_legacy(path:str = None, key:str = "*", return_IDs:bool = False, regularization_method:str = 'standardize', custom_feature_weights:dict = {'MAX_DIST':1, 'CV_AREA':1, 'SPHE':1, 'ELLI':1, 'CV_DENSITY':1}, verbose:bool = True):    
     """Standalone implementation of the Blob-B-Gone method for removing blobs from Single Particle Tracking data.
 
@@ -321,9 +333,13 @@ class blobBgone(object):
             print("\nExtracting features...")
         # Extract features
         features = []
-        for task in self.task_list:
-            task.extract()
-            features.append(task.to_array())
+        task:featureHandler
+        with tqdm(total = len(self.task_list), desc = "Extracting features") as pbar:
+            for task in self.task_list:
+                task.extract()
+                features.append(task.to_array())
+                pbar.update(1)
+            pbar.close()
         return features
     
     def __regularize_features(self, features:np.ndarray):
