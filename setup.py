@@ -37,6 +37,6 @@ setup(
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
     ],
-    install_requires = required,
+    install_requires = ['numpy', 'scipy', 'matplotlib', 'scikit-learn', 'tqdm', 'pandas', 'saeborn'],
     url='https://github.com/Eggeling-Lab-Microscope-Software/blob-B-gone'
 )
