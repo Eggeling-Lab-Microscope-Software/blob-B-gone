@@ -7,6 +7,12 @@ from blobBgone.features2D import features2D
 from blobBgone.features3D import features3D
 from blobBgone.eval import eval
 
+# Set the number of threads to 1 
+# this is a hacky fix for a currently known issue with the 
+# KMeans algorithm implemented in scikit-learn.
+# This will be removed as soon as the issue is resolved.
+os.environ['OMP_NUM_THREADS'] = '1'
+
 # dynamic tqdm
 from IPython import get_ipython
 try:
@@ -212,8 +218,8 @@ class blobBgone(object):
     
     ## Evaluation ##
     def plot_PCA(self, include_eigenvectors:bool = True, absolute:bool = False):
-        combined_features, labels = self.__construct_labels()
-        return eval.plot_PCA(features = self.__apply_custom_weights(self.__regularize_features(combined_features)), 
+        combined_features, labels = self.__construct_labels_silent()
+        return eval.plot_PCA(features = self.__apply_custom_weights_silent(self.__regularize_features_silent(combined_features)), 
                              labels = labels, 
                              feature_keywords = list(self.__task_list[0].features.__dict__.keys()), 
                              include_eigenvectors=include_eigenvectors,
@@ -297,6 +303,30 @@ class blobBgone(object):
         labels = np.concatenate((np.zeros(len(self.__blobs)), np.ones(len(self.__free))))
         return combined_features, labels
     
+#%% silent functions
+    def __construct_labels_silent(self):
+        try:
+            assert self.__blobs is not None, "Blob cluster not yet extracted."
+            assert self.__free is not None, "Free cluster not yet extracted."
+        except AssertionError as error:
+            print(error)
+            return print("Please call the 'run' method first.")
 
+        combined_features = np.concatenate(([task.to_array() for task in self.__blobs], 
+                                            [task.to_array() for task in self.__free]))
+
+        labels = np.concatenate((np.zeros(len(self.__blobs)), np.ones(len(self.__free))))
+        return combined_features, labels
+    
+    def __regularize_features_silent(self, features:np.ndarray):
+        features = featureHandler.regularize_output(features, method = self.__regularization)
+        assert np.all(np.isfinite(features)), "NaN values still present in features."
+        return features
+    
+    def __apply_custom_weights_silent(self, features:np.ndarray):
+        weights = np.array([self.__custom_weights[feature] for feature in list(self.__task_list[0].features.__dict__.keys())])
+        if np.all(weights == 1):
+            return features
+        return features*weights
         
     
