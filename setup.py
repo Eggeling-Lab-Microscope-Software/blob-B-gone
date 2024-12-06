@@ -2,6 +2,9 @@ from setuptools import setup, find_packages
 
 with open('README.md') as f:
     readme = f.read()
+    
+with open("requirements.txt") as f:
+    required = f.read().splitlines()
 
 setup(
     name='blobBgone',
@@ -28,7 +31,6 @@ setup(
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
     ],
-    install_requires=['numpy', 'scipy', 'matplotlib', 'pandas', 'scikit-learn', 'seaborn', 'tqdm'],
-    python_requires='>=3',
+    install_requires = required,
     url='https://github.com/Eggeling-Lab-Microscope-Software/blob-B-gone'
 )
