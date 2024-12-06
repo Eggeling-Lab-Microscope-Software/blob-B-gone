@@ -112,6 +112,10 @@ class featureHandler():
         
         try:
             assert pointCloud.shape[1] in [2,3], "pointCloud must be two or three dimensional"
+            
+            if verbose:
+                print(f"Dimension has been set to {pointCloud.shape[1]}")
+            
             return cls(pointCloud = pointCloud, 
                    id = int(__path_leaf(path).split('-',1)[1][:-4]),
                    verbose = verbose)
@@ -123,6 +127,9 @@ class featureHandler():
         try:
             assert isinstance(pointCloud, np.ndarray), "Point Cloud must be a numpy array"
             assert pointCloud.shape[1] in [2,3], "pointCloud must be two or three dimensional"
+            
+            if verbose:
+                print(f"Dimension has been set to {pointCloud.shape[1]}")
             
             return cls(pointCloud = pointCloud, 
                    id = id,
@@ -193,8 +200,8 @@ class featureHandler():
         plt.style.use("dark_background")
         
         font = {'family' : 'DejaVu Sans',
-        'weight' : 'normal',
-        'size'   : 12}
+                'weight' : 'normal',
+                'size'   : 12}
 
         plt.rc('font', **font)
         
