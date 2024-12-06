@@ -8,10 +8,6 @@ setup_dir = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(setup_dir, 'README.md')) as f:
     readme = f.read()
 
-# Read the requirements.txt file
-with open(os.path.join(setup_dir, "requirements.txt")) as f:
-    required = f.read().splitlines()
-
 setup(
     name='blobBgone',
     version='0.2.0',
@@ -38,5 +34,6 @@ setup(
     "Operating System :: OS Independent",
     ],
     install_requires = ['numpy', 'scipy', 'matplotlib', 'scikit-learn', 'tqdm', 'pandas', 'saeborn'],
+    python_requires='>=3.11',
     url='https://github.com/Eggeling-Lab-Microscope-Software/blob-B-gone'
 )
