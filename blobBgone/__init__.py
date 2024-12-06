@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from sklearn import metrics
+import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from blobBgone.featureHandler import featureHandler
 from blobBgone.features2D import features2D
@@ -23,23 +24,38 @@ try:
         from tqdm import tqdm
 except:
     from tqdm import tqdm
+    
+## typehinting
+from typing import List, Dict, Union 
 
 ## Class definition of BlobBGone ##
 
 class blobBgone(object):
     __verbose:bool
     __regularization:str
-    __custom_weights:dict
+    __custom_weights:Dict[str, Union[int, float]]
     
-    __task_list:list
-    __blob_IDs:list
-    __free_IDs:list
-    __blobs:list
-    __free:list
+    __task_list:List[featureHandler]
+    __blob_IDs:List[int]
+    __free_IDs:List[int]
+    __blobs:List[featureHandler]
+    __free:List[featureHandler]
     
     ## Initialization ##
-    def __init__(self, task_list:list, 
-                 verbose:bool = True) -> None:
+    def __init__(self, 
+                 task_list:List[featureHandler], 
+                 verbose:bool = True
+                 ) -> 'blobBgone':
+        """Initializes the BlobBGone object. This object is used to cluster a list of featureHandler objects into two clusters, one of which is assumed to be the blob cluster.
+
+        Args:
+            task_list (List[featureHandler]): List of featureHandler objects.
+            verbose (bool, optional): Determines the object's verbosity. Defaults to True.
+
+        Returns:
+            blobBgone: Constructor.
+        """
+        
         self.__verbose = verbose
         self.__task_list = task_list
         self.__regularization = "standardize"
@@ -84,7 +100,7 @@ class blobBgone(object):
     def task_list(self):
         return self.__task_list
     @task_list.setter
-    def task_list(self, task_list:list):
+    def task_list(self, task_list:List[featureHandler]):
         self.__task_list = task_list
         return print("Task list has been updated.")
     
@@ -138,8 +154,21 @@ class blobBgone(object):
         
     ## Class Methods ##
     @classmethod
-    def from_npy(cls, path:str = None, key:str = "*",
-                 verbose:bool = True) -> None:
+    def from_npy(cls, 
+                 path:str = None, 
+                 key:str = "*",
+                 verbose:bool = True
+                 ) -> 'blobBgone':
+        """Instantiates a BlobBGone object from a directory containing .npy files.
+
+        Args:
+            path (str, optional): path/to/*.npy_files. Defaults to None.
+            key (str, optional): Pattern matching expression to only import specific files. Defaults to "*".
+            verbose (bool, optional): Determines the object's verbosity. Defaults to True.
+
+        Returns:
+            blobBgone: Calls the constructor.
+        """
         
         files = featureHandler.grab_files(path = path, key = key, dtype=".npy")
         if verbose:
@@ -152,8 +181,21 @@ class blobBgone(object):
         return cls(task_list = task_list, verbose = verbose)
     
     @classmethod
-    def from_pointCloud(cls, pointClouds:dict, 
-                        verbose:bool = True) -> None:
+    def from_pointCloud(cls, 
+                        pointClouds:Dict[int, np.ndarray], 
+                        verbose:bool = True
+                        ) -> 'blobBgone':
+        """Instantiates a BlobBGone object from a dictionary containing point cloud data. 
+           The keys are the IDs of the point clouds as integers. The values are the point cloud data as column-stacked numpy arrays. 
+           The shape should be [N,DIM] where N is the number of points and DIM is the dimensionality of the point cloud.
+
+        Args:
+            pointClouds (Dict[int, np.ndarray]): Input data. Dict[int, np.ndarray] with array-shape [N,DIM].
+            verbose (bool, optional): Determines the object's verbosity. Defaults to True.
+
+        Returns:
+            blobBgone: Calls the constructor.
+        """
         
         task_list = [featureHandler.from_pointCloud(pointCloud = value, id = key,  verbose = False) for key,value in pointClouds.items()]
         if verbose:
@@ -217,7 +259,11 @@ class blobBgone(object):
         return
     
     ## Evaluation ##
-    def plot_PCA(self, include_eigenvectors:bool = True, absolute:bool = False):
+    def plot_PCA(self, 
+                 include_eigenvectors:bool = True, 
+                 absolute:bool = False
+                 )->Union[plt.Figure, plt.Axes]:
+        
         combined_features, labels = self.__construct_labels_silent()
         return eval.plot_PCA(features = self.__apply_custom_weights_silent(self.__regularize_features_silent(combined_features)), 
                              labels = labels, 
@@ -230,7 +276,7 @@ class blobBgone(object):
     def custom_weights(self):
         return self.__custom_weights
     @custom_weights.setter
-    def custom_weights(self, custom_weights:dict):
+    def custom_weights(self, custom_weights:Dict):
         try:
             assert isinstance(custom_weights, dict), "custom_weights must be a dictionary."
             assert set(custom_weights.keys()) == set(self.__custom_weights.keys()), "custom_weights must have the same keys as the features."

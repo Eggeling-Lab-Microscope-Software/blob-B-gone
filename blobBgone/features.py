@@ -1,10 +1,15 @@
 from pprint import pformat
 import numpy as np
 
+from typing import List, Any
+
 
 class features():
     
-    def __unpack(self, data)->list:
+    def __unpack(self, 
+                 data:List[Any]
+                 )->List[np.ndarray]:
+        
         col = []
         for feature in data:
             if isinstance(feature, np.ndarray):

@@ -8,10 +8,17 @@ from blobBgone.utils import Helper
 import matplotlib.patches as mpatches
 from sklearn.decomposition import PCA
 
+# typehinting
+from typing import List, Tuple
+
 ## Collection of small quick evaluation methods
 class eval(object):
     @staticmethod
-    def plot_feature_correlation_heatmaps(blob_features:np.ndarray, track_features:np.ndarray, feature_keywords:list):
+    def plot_feature_correlation_heatmaps(blob_features:np.ndarray, 
+                                          track_features:np.ndarray, 
+                                          feature_keywords:List[str]
+                                          )->Tuple[plt.Figure, plt.Axes]:
+        
         """Plot the correlation matrices of the blob and track features as heatmaps.
 
         Args:
@@ -68,7 +75,11 @@ class eval(object):
         return fig, axs
 
     @staticmethod
-    def plot_feature_correlation_clustermap(features:np.ndarray, feature_keywords:list, title:str = 'Correlation Clustermap'):
+    def plot_feature_correlation_clustermap(features:np.ndarray, 
+                                            feature_keywords:List[str], 
+                                            title:str = 'Correlation Clustermap'
+                                            )->plt.Figure:
+        
         """Plot a clustermap of the correlation matrix of the features. This includes a dendrogram to show the clustering of the features.
 
         Args:
@@ -108,7 +119,12 @@ class eval(object):
         return cm1
             
     @staticmethod
-    def plot_feature_distributions(features1:np.ndarray, features2:np.ndarray, feature_keywords:list, title:str = 'Feature Distribution'):
+    def plot_feature_distributions(features1:np.ndarray, 
+                                   features2:np.ndarray, 
+                                   feature_keywords:List, 
+                                   title:str = 'Feature Distribution'
+                                   )->Tuple[plt.Figure, plt.Axes]:
+        
         """Plot a comparison of the feature distributions of two feature sets.
 
         Args:
@@ -144,7 +160,13 @@ class eval(object):
         return fig, axs
         
     @staticmethod
-    def plot_PCA(features:np.ndarray, labels:np.ndarray, feature_keywords:list, include_eigenvectors:bool = False, absolute:bool = False):
+    def plot_PCA(features:np.ndarray, 
+                 labels:np.ndarray, 
+                 feature_keywords:List, 
+                 include_eigenvectors:bool = False, 
+                 absolute:bool = False
+                 )->Tuple[plt.Figure, plt.Axes]:
+        
         """Plot the PCA of the features and optionally, the respective Eigenvectors.
 
         Args:
@@ -166,7 +188,10 @@ class eval(object):
                 'size'   : 10}
         plt.rc('font', **font)
         
-        def _calculate_PCA_eigenvectors(pca:PCA, absolute:bool = True):
+        def _calculate_PCA_eigenvectors(pca:PCA, 
+                                        absolute:bool = True
+                                        )->Tuple[np.ndarray, np.ndarray]:
+            
             ## A Function to calculate the eigenvectors of the PCA for a list of features and return both eigenvectors and explained variance ratios
             
             pca.fit_transform(features)
@@ -176,7 +201,12 @@ class eval(object):
             else:
                 return pca.components_, pca.explained_variance_ratio_.round(2)
             
-        def _plot_PCA_eigenvectors(pca:PCA, feature_keywords:list, absolute:bool = True, ax = None):
+        def _plot_PCA_eigenvectors(pca:PCA, 
+                                   feature_keywords:List[str], 
+                                   absolute:bool = True, 
+                                   ax = None
+                                   )->Tuple[plt.Figure, plt.Axes]:
+            
             PCA_components, PCA_ratios = _calculate_PCA_eigenvectors(pca=pca, absolute = absolute)
             PCA_components_dict = {'PCA_comp':(PCA_components, PCA_ratios)}
 
