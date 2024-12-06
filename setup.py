@@ -8,7 +8,7 @@ with open("requirements.txt") as f:
 
 setup(
     name='blobBgone',
-    version='0.2.1',
+    version='1.0.0',
     description='A lightweight tool to remove blob artifacts from 2D/3D point cloud data as produced by MINFLUX ',
     long_description=readme,
     long_description_content_type='text/markdown',
