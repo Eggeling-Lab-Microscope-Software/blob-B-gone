@@ -1,9 +1,15 @@
+import os
 from setuptools import setup, find_packages
 
-with open('README.md') as f:
+# Get the absolute path of the directory containing setup.py
+setup_dir = os.path.abspath(os.path.dirname(__file__))
+
+# Read the README file
+with open(os.path.join(setup_dir, 'README.md')) as f:
     readme = f.read()
-    
-with open("requirements.txt") as f:
+
+# Read the requirements.txt file
+with open(os.path.join(setup_dir, "requirements.txt")) as f:
     required = f.read().splitlines()
 
 setup(
