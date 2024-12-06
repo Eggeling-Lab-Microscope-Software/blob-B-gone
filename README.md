@@ -1,12 +1,12 @@
 # About
-This repository contains the source code and data made available for the article [Blob-B-Gone: a lightweight framework for removing blob artifacts from 2D/3D MINFLUX single-particle tracking data](https://doi.org/10.3389/fbinf.2023.1268899) published in *Frontiers in Bioinformatics*.
+This repository contains the source code, data and figures made available for the article [Blob-B-Gone: a lightweight framework for removing blob artifacts from 2D/3D MINFLUX single-particle tracking data](https://doi.org/10.3389/fbinf.2023.1268899) published in *Frontiers in Bioinformatics*.
 
 # Blob-B-Gone
 ### Basic Usage
 ```python
 from blobBgone import blobBgone
 
-BBEG = blobBgone.from_npy(path = 'path/to/dir/')        # <- from files
+BBEG = blobBgone.from_npy('path/to/dir/')        # <- from files
 BBEG = blobBgone.from_pointCloud(Dict[int,np.ndarray])  # <- from point cloud
 
 BBEG.run()                                              # <- run the algorithm

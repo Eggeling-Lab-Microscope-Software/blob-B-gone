@@ -139,12 +139,12 @@
         </head>
         <body class="vscode-body vscode-light">
             <h1 id="about">About</h1>
-<p>This repository contains the source code and data made available for the article <a href="https://doi.org/10.3389/fbinf.2023.1268899">Blob-B-Gone: a lightweight framework for removing blob artifacts from 2D/3D MINFLUX single-particle tracking data</a> published in <em>Frontiers in Bioinformatics</em>.</p>
+<p>This repository contains the source code, data and figures made available for the article <a href="https://doi.org/10.3389/fbinf.2023.1268899">Blob-B-Gone: a lightweight framework for removing blob artifacts from 2D/3D MINFLUX single-particle tracking data</a> published in <em>Frontiers in Bioinformatics</em>.</p>
 <h1 id="blob-b-gone">Blob-B-Gone</h1>
 <h3 id="basic-usage">Basic Usage</h3>
 <pre><code class="language-python"><span class="hljs-keyword">from</span> blobBgone <span class="hljs-keyword">import</span> blobBgone
 
-BBEG = blobBgone.from_npy(path = <span class="hljs-string">&#x27;path/to/dir/&#x27;</span>)        <span class="hljs-comment"># &lt;- from files</span>
+BBEG = blobBgone.from_npy(<span class="hljs-string">&#x27;path/to/dir/&#x27;</span>)        <span class="hljs-comment"># &lt;- from files</span>
 BBEG = blobBgone.from_pointCloud(<span class="hljs-type">Dict</span>[<span class="hljs-built_in">int</span>,np.ndarray])  <span class="hljs-comment"># &lt;- from point cloud</span>
 
 BBEG.run()                                              <span class="hljs-comment"># &lt;- run the algorithm</span>
