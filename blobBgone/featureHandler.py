@@ -155,7 +155,7 @@ class featureHandler():
     
     @staticmethod
     def regularize_output(features:list, method:str)->np.ndarray:
-        features = np.row_stack(features).astype(np.float32)
+        features = np.vstack(features).astype(np.float32)
 
         def __standardize_features(stand_feature:np.ndarray)->np.ndarray:
             mean = np.mean(stand_feature, axis=0)
@@ -214,7 +214,7 @@ class featureHandler():
         fig, axs = plt.subplots(1,1, figsize = (5,5), dpi = 100)
         plt.title(f"Point Cloud #{self.__id}", fontsize = 10)
         axs.scatter(*zip(*self.__pointCloud), s = 0.5, c = "deeppink")
-        axs.plot(*zip(*np.row_stack([*self.__pointCloud[spatial.ConvexHull(self.__pointCloud).vertices], self.__pointCloud[spatial.ConvexHull(self.__pointCloud).vertices][0]])), '->', label = "Convex Hull", c = "dodgerblue")
+        axs.plot(*zip(*np.vstack([*self.__pointCloud[spatial.ConvexHull(self.__pointCloud).vertices], self.__pointCloud[spatial.ConvexHull(self.__pointCloud).vertices][0]])), '->', label = "Convex Hull", c = "dodgerblue")
         axs.scatter(*np.mean(self.__pointCloud, axis = 0), c = "lawngreen", s = 5, label = 'Center of Mass')
         
         axs.set_aspect("equal")
@@ -228,7 +228,7 @@ class featureHandler():
         fig, axs = plt.subplots(1,1, figsize = (5,5), dpi = 100, subplot_kw={'projection': '3d'})
         plt.title(f"Point Cloud #{self.__id}", fontsize = 10)
         axs.scatter(*zip(*self.__pointCloud), s = 0.5, c = "deeppink")
-        axs.scatter(*zip(*np.row_stack([*self.__pointCloud[spatial.ConvexHull(self.__pointCloud).vertices], self.__pointCloud[spatial.ConvexHull(self.__pointCloud).vertices][0]])), '->', label = "Convex Hull", c = "dodgerblue")
+        axs.scatter(*zip(*np.vstack([*self.__pointCloud[spatial.ConvexHull(self.__pointCloud).vertices], self.__pointCloud[spatial.ConvexHull(self.__pointCloud).vertices][0]])), '->', label = "Convex Hull", c = "dodgerblue")
         axs.scatter(*np.mean(self.__pointCloud, axis = 0), c = "lawngreen", s = 5, label = 'Center of Mass')
         
         axs.set_xlabel("x [m]")
