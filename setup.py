@@ -10,7 +10,7 @@ with open(os.path.join(setup_dir, 'README.md')) as f:
 
 setup(
     name='blobBgone',
-    version='0.2.0',
+    version='0.2.1',
     description='A lightweight tool to remove blob artifacts from 2D/3D point cloud data as produced by MINFLUX ',
     long_description=readme,
     long_description_content_type='text/markdown',
@@ -33,7 +33,7 @@ setup(
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
     ],
-    install_requires = ['numpy', 'scipy', 'matplotlib', 'scikit-learn', 'tqdm', 'pandas', 'saeborn'],
-    python_requires='>=3.11',
+    install_requires = ['numpy', 'scipy', 'matplotlib', 'scikit-learn', 'tqdm', 'pandas', 'seaborn'],
+    python_requires='>=3.9',
     url='https://github.com/Eggeling-Lab-Microscope-Software/blob-B-gone'
 )

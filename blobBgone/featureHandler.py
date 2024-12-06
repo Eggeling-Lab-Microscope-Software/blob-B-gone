@@ -17,6 +17,9 @@ try:
     from blobBgone.utils import pyDialogue as pD
 except:
     warnings.warn("pyDialogue could not be imported. This could be due to a conflict with tkinter. Falling back to manual mode.")
+    
+# typehinting
+from typing import List
 
 class featureHandler():
     def __init__(self, pointCloud:np.ndarray, id:int, verbose:bool = True) -> None:
@@ -94,7 +97,11 @@ class featureHandler():
     ## Classmethods
     # Please note, that we currently only support .npy files as input as tey are commonly found and other methods can be implemented rapidly when needed.
     @classmethod
-    def from_npy(cls, path:str = None, verbose:bool = True):
+    def from_npy(cls, 
+                 path:str = None, 
+                 verbose:bool = True
+                 )->'featureHandler':
+        
         def __path_leaf(path):
             head, tail = ntpath.split(path)
             return tail or ntpath.basename(head)
@@ -123,7 +130,12 @@ class featureHandler():
             raise Exception("pointCloud must be of shape (n,2) or (n,3)")
         
     @classmethod
-    def from_pointCloud(cls, pointCloud:np.ndarray, id:int, verbose:bool = True):
+    def from_pointCloud(cls, 
+                        pointCloud:np.ndarray,
+                        id:int,
+                        verbose:bool = True
+                        )->'featureHandler':
+        
         try:
             assert isinstance(pointCloud, np.ndarray), "Point Cloud must be a numpy array"
             assert pointCloud.shape[1] in [2,3], "pointCloud must be two or three dimensional"
@@ -141,7 +153,11 @@ class featureHandler():
 
     ## Staticmethods
     @staticmethod
-    def grab_files(path:str = None, key:str = "*", dtype:str = ".npy"):
+    def grab_files(path:str = None, 
+                   key:str = "*", 
+                   dtype:str = ".npy"
+                   )->np.ndarray:
+        
         if path == None:
             try:
                 path = pD.askDIR()
@@ -154,7 +170,10 @@ class featureHandler():
         return np.array(glob.glob(os.path.join(path, f"{key}{dtype}")))
     
     @staticmethod
-    def regularize_output(features:list, method:str)->np.ndarray:
+    def regularize_output(features:List[float], 
+                          method:str
+                          )->np.ndarray:
+        
         features = np.vstack(features).astype(np.float32)
 
         def __standardize_features(stand_feature:np.ndarray)->np.ndarray:
